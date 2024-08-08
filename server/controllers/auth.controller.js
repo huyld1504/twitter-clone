@@ -19,7 +19,7 @@ const signup = async (req, res) => {
         }
 
         if (password.length < 6) {
-            return res.status(400).json({message: "Password must be at least 6 characters"});
+            return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
 
         //Hash password
@@ -38,13 +38,17 @@ const signup = async (req, res) => {
             await newUser.save();
 
             return res.status(200).json({
-                _id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                followers: newUser.followers,
-                following: newUser.following,
-                profileImage: newUser.profileImage,
-                coverImage: newUser.coverImage
+                success: true,
+                message: "Sign up successfully",
+                data: {
+                    _id: newUser._id,
+                    fullName: newUser.fullName,
+                    email: newUser.email,
+                    followers: newUser.followers,
+                    following: newUser.following,
+                    profileImage: newUser.profileImage,
+                    coverImage: newUser.coverImage
+                }
             });
         } else {
             res.status(400).json({ message: "Invalid user data!" });
@@ -72,13 +76,17 @@ const signin = async (req, res) => {
         generateTokenAndSetCookie(user._id, res);
 
         return res.status(200).json({
-            _id: user._id,
-            fullName: user.fullName,
-            email: user.email,
-            followers: user.followers,
-            following: user.following,
-            profileImage: user.profileImage,
-            coverImage: user.coverImage
+            success: true,
+            message: "Log in successfully",
+            data: {
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                followers: user.followers,
+                following: user.following,
+                profileImage: user.profileImage,
+                coverImage: user.coverImage
+            }
         });
     } catch (error) {
         res.status(500).json({ message: "Interval Server Error!" });
@@ -87,8 +95,8 @@ const signin = async (req, res) => {
 }
 const logout = async (req, res) => {
     try {
-        res.cookie("jwt", "", {maxAge: 0});
-        res.status(200).json({message: "Logged out successfully"});
+        res.cookie("jwt", "", { maxAge: 0 });
+        res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: "Interval Server Error!" });

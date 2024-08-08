@@ -15,7 +15,7 @@ export const getProfileUser = async (req, res) => {
         return res.status(200).json(user);
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -57,7 +57,7 @@ export const followUnfollowUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -87,7 +87,7 @@ export const getSuggestedUser = async (req, res) => {
         res.status(200).json(suggestedUser);
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -97,32 +97,35 @@ export const updateProfileUser = async (req, res) => {
     let { profileImage, coverImage } = req.body;
 
     const userId = req.user._id;
-    const values = {username, email, fullName, password: "", bio, link, profileImage, coverImage};
+    const values = { username, email, fullName, password: "" , bio, link, profileImage, coverImage };
 
     try {
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({success: false, message: "User not found" });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
         if ((!newPassword && currentPassword) || (!currentPassword && newPassword)) {
-            return res.status(400).json({success: false, message: "Please provide both current password and new password" });
+            return res.status(400).json({ success: false, message: "Please provide both current password and new password" });
         }
 
         if (currentPassword && newPassword) {
             const isMatchPassword = await bcrypt.compare(currentPassword, user.password);
             if (!isMatchPassword) {
-                return res.status(400).json({success: false, message: "Current password is incorrect" });
+                return res.status(400).json({ success: false, message: "Current password is incorrect" });
             }
             if (newPassword.length < 6) {
-                return res.status(400).json({success: false, message: "Password must be at least 6 characters" });
+                return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
             }
             if (newPassword === currentPassword) {
-                return res.status(400).json({success: false,message: "You can not use your current password to set your new password"});
+                return res.status(400).json({ success: false, message: "You can not use your current password to set your new password" });
             }
 
             const salt = await bcrypt.genSalt(10);
             const hashedNewPassword = await bcrypt.hash(newPassword, salt);
             values.password = hashedNewPassword;
+        } else {
+            values.password = user.password;
         }
+
         if (profileImage) {
             if (user.profileImage) {
                 await cloudinary.uploader.destroy(user.profileImage.split("/").pop().split(".")[0]);
@@ -142,9 +145,10 @@ export const updateProfileUser = async (req, res) => {
         }
 
         await User.findByIdAndUpdate(req.user._id, values);
-        return res.status(200).json({message: "Updated successfully", success: true});
+        return res.status(200).json({ message: "Updated successfully", success: true });
+
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({message: error.message, success: false});
+        res.status(500).json({ message: error.message, success: false });
     }
 }
