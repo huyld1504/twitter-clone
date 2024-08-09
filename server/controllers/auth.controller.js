@@ -2,20 +2,23 @@ import { generateTokenAndSetCookie } from "../lib/utils/generateToken.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
-const signup = async (req, res) => {
+export const signup = async (req, res) => {
     try {
         const { username, email, fullName, password } = req.body;
 
-        const existingUser = await User.findOne({ username: username });
-
-        const existingEmail = await User.findOne({ email: email });
-
-        if (existingUser) {
-            res.status(400).json({ message: "Username is already existed!" });
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: "Invalid email format" });
         }
 
+        const existingEmail = await User.findOne({ email });
         if (existingEmail) {
-            res.status(400).json({ message: "Email is already existed!" });
+            return res.status(400).json({ message: "Email is already existed!" });
+        }
+
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: "Username is already existed!" });
         }
 
         if (password.length < 6) {
@@ -37,12 +40,13 @@ const signup = async (req, res) => {
             generateTokenAndSetCookie(newUser._id, res);
             await newUser.save();
 
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 message: "Sign up successfully",
                 data: {
                     _id: newUser._id,
                     fullName: newUser.fullName,
+                    username: newUser.username,
                     email: newUser.email,
                     followers: newUser.followers,
                     following: newUser.following,
@@ -55,11 +59,11 @@ const signup = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: "Interval Server Error!" });
-        console.log(error.message);
+        console.log(error);
     }
 }
 
-const signin = async (req, res) => {
+export const signin = async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await User.findOne({ username: username });
@@ -93,7 +97,8 @@ const signin = async (req, res) => {
         console.log(error.message);
     }
 }
-const logout = async (req, res) => {
+
+export const logout = async (req, res) => {
     try {
         res.cookie("jwt", "", { maxAge: 0 });
         res.status(200).json({ message: "Logged out successfully" });
@@ -103,7 +108,7 @@ const logout = async (req, res) => {
     }
 }
 
-const getCookieUser = async (req, res) => {
+export const getCookieUser = async (req, res) => {
     try {
         const cookieUser = await User.findById(req.user._id).select("-password");
 
@@ -112,6 +117,5 @@ const getCookieUser = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ message: "Interval Server Error!" });
     }
-}
+};
 
-export { signin, signup, logout, getCookieUser };

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 
 import XSvg from "../../components/svgs/X.jsx";
 
@@ -7,6 +8,7 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
+// import toast from "react-hot-toast";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -16,16 +18,38 @@ const SignUpPage = () => {
     password: "",
   });
 
+  // const { mutate, isError, isPending } = useMutation({
+  //   mutationFn: async ({ email, username, fullName, password }) => {
+  //     try {
+  //       const res = await fetch("/api/auth/signup", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "Application/json",
+  //         },
+  //         body: JSON.stringify({username, email, fullName, password }),
+  //       });
+
+  //       const result = res.json();
+  //       // if (!res.ok) throw new Error(result.message || "Failed to create account");
+  //       console.log(result);
+  //       toast.error(result.message);
+  //       return result;
+  //     } catch (error) {
+  //       toast.error(error.message);
+  //       console.log(error);
+  //     }
+  //   },
+  // });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    // mutate(formData);
+    console.log(formData)
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const isError = false;
 
   return (
     <div className="max-w-screen-xl mx-auto flex h-screen px-10">
@@ -85,15 +109,17 @@ const SignUpPage = () => {
               value={formData.password}
             />
           </label>
-          <button className="btn rounded-full btn-primary text-white">
+          <button className="btn rounded-full btn-primary text-white" type="submit">
             Sign up
           </button>
-          {isError && <p className="text-red-500">Something went wrong</p>}
+          {/* {isError && <p className="text-red-500"></p>} */}
         </form>
         <div className="flex flex-row lg:w-2/3 gap-2 mt-4">
           <p className="text-white text-lg">Already have an account?</p>
           <span className=" text-primary text-lg">
-            <Link to={"/signin"}><b>Sign in</b></Link>
+            <Link to={"/signin"}>
+              <b>Sign in</b>
+            </Link>
           </span>
         </div>
       </div>
