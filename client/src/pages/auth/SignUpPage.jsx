@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 
 import XSvg from "../../components/svgs/X.jsx";
 
@@ -8,7 +7,10 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
-// import toast from "react-hot-toast";
+import {MdOutlineVisibility} from "react-icons/md";
+import { MdOutlineVisibilityOff } from "react-icons/md";
+import toast from "react-hot-toast";
+import { useMutation } from "@tanstack/react-query";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -17,34 +19,40 @@ const SignUpPage = () => {
     fullName: "",
     password: "",
   });
+  const [isShowPassword, setIsShowPassword] = useState(true);
 
-  // const { mutate, isError, isPending } = useMutation({
-  //   mutationFn: async ({ email, username, fullName, password }) => {
-  //     try {
-  //       const res = await fetch("/api/auth/signup", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "Application/json",
-  //         },
-  //         body: JSON.stringify({username, email, fullName, password }),
-  //       });
+  const togglePasswordVisibility = () => {
+    setIsShowPassword(!isShowPassword);
+  };
 
-  //       const result = res.json();
-  //       // if (!res.ok) throw new Error(result.message || "Failed to create account");
-  //       console.log(result);
-  //       toast.error(result.message);
-  //       return result;
-  //     } catch (error) {
-  //       toast.error(error.message);
-  //       console.log(error);
-  //     }
-  //   },
-  // });
+  const { mutate, isError, error, isPending } = useMutation({
+    mutationFn: async ({ username, password, fullName, email }) => {
+      try {
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password, fullName }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(result.message);
+        } else {
+          toast.error(result.message || "Failed to create new account");
+        }
+        return result;
+      } catch (error) {
+        toast.error(error);
+        console.log(error);
+      }
+    },
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // mutate(formData);
-    console.log(formData)
+    mutate(formData);
   };
 
   const handleInputChange = (e) => {
@@ -63,6 +71,8 @@ const SignUpPage = () => {
         >
           <XSvg className="w-24 lg:hidden fill-white" />
           <h1 className="text-4xl font-extrabold text-white">Join today.</h1>
+
+          {/* Input Email */}
           <label className="input input-bordered rounded flex items-center gap-2">
             <MdOutlineMail />
             <input
@@ -74,6 +84,8 @@ const SignUpPage = () => {
               value={formData.email}
             />
           </label>
+
+          {/* Input Username */}
           <div className="flex gap-4 flex-wrap">
             <label className="input input-bordered rounded flex items-center gap-2 flex-1">
               <FaUser />
@@ -86,6 +98,8 @@ const SignUpPage = () => {
                 value={formData.username}
               />
             </label>
+
+            {/* Input Full Name */}
             <label className="input input-bordered rounded flex items-center gap-2 flex-1">
               <MdDriveFileRenameOutline />
               <input
@@ -98,21 +112,29 @@ const SignUpPage = () => {
               />
             </label>
           </div>
+
+          {/* Input password */}
           <label className="input input-bordered rounded flex items-center gap-2">
             <MdPassword />
             <input
-              type="password"
+              type={isShowPassword ? "password" : "text"}
               className="grow"
               placeholder="Password"
               name="password"
               onChange={handleInputChange}
               value={formData.password}
             />
+            <button onClick={togglePasswordVisibility} className="top-2 right-2" type="button">
+              {isShowPassword ? <MdOutlineVisibility/> : <MdOutlineVisibilityOff/>}
+            </button>
           </label>
-          <button className="btn rounded-full btn-primary text-white" type="submit">
-            Sign up
+          <button
+            className="btn rounded-full btn-primary text-white text-xl"
+            type="submit"
+          >
+            {isPending ? "Loading..." : "Sign up"}
           </button>
-          {/* {isError && <p className="text-red-500"></p>} */}
+          {isError && <p className="text-red-500">{error.message}</p>}
         </form>
         <div className="flex flex-row lg:w-2/3 gap-2 mt-4">
           <p className="text-white text-lg">Already have an account?</p>
