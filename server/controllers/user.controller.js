@@ -4,10 +4,10 @@ import bcrypt from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
 
 export const getProfileUser = async (req, res) => {
-    const { id } = req.params;
+    const { username } = req.params;
 
     try {
-        const user = await User.findById(id).select("-password");
+        const user = await User.findOne({username: username}).select("-password");
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
