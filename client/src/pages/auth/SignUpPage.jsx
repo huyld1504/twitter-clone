@@ -7,12 +7,13 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
-import {MdOutlineVisibility} from "react-icons/md";
+import { MdOutlineVisibility } from "react-icons/md";
 import { MdOutlineVisibilityOff } from "react-icons/md";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 
 const SignUpPage = () => {
+
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -25,7 +26,7 @@ const SignUpPage = () => {
     setIsShowPassword(!isShowPassword);
   };
 
-  const { mutate, isError, error, isPending } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: async ({ username, password, fullName, email }) => {
       try {
         const response = await fetch("/api/auth/signup", {
@@ -37,15 +38,16 @@ const SignUpPage = () => {
         });
 
         const result = await response.json();
-        if (response.ok) {
-          toast.success(result.message);
-        } else {
-          toast.error(result.message || "Failed to create new account");
-        }
-        return result;
+
+          if (result.success === true) {
+            toast.success(result.message);
+          } else {
+            toast.error(result.message);
+          }
+        return result.data;
       } catch (error) {
-        toast.error(error);
         console.log(error);
+        toast.error(error);
       }
     },
   });
@@ -76,7 +78,7 @@ const SignUpPage = () => {
           <label className="input input-bordered rounded flex items-center gap-2">
             <MdOutlineMail />
             <input
-              type="email"
+              type="text"
               className="grow"
               placeholder="Email"
               name="email"
@@ -124,17 +126,24 @@ const SignUpPage = () => {
               onChange={handleInputChange}
               value={formData.password}
             />
-            <button onClick={togglePasswordVisibility} className="top-2 right-2" type="button">
-              {isShowPassword ? <MdOutlineVisibility/> : <MdOutlineVisibilityOff/>}
+            <button
+              onClick={togglePasswordVisibility}
+              className="top-2 right-2"
+              type="button"
+            >
+              {isShowPassword ? (
+                <MdOutlineVisibility />
+              ) : (
+                <MdOutlineVisibilityOff />
+              )}
             </button>
           </label>
           <button
             className="btn rounded-full btn-primary text-white text-xl"
             type="submit"
           >
-            {isPending ? "Loading..." : "Sign up"}
+            Sign up
           </button>
-          {isError && <p className="text-red-500">{error.message}</p>}
         </form>
         <div className="flex flex-row lg:w-2/3 gap-2 mt-4">
           <p className="text-white text-lg">Already have an account?</p>

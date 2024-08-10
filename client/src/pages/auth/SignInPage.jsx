@@ -3,8 +3,13 @@ import { Link } from "react-router-dom";
 
 import XSvg from "../../components/svgs/X";
 
-import { MdOutlineMail } from "react-icons/md";
+import { MdOutlineVisibility } from "react-icons/md";
+import { MdOutlineVisibilityOff } from "react-icons/md";
+import { FaRegUser } from "react-icons/fa";
+
 import { MdPassword } from "react-icons/md";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const SignInPage = () => {
   const [formData, setFormData] = useState({
@@ -12,16 +17,51 @@ const SignInPage = () => {
     password: "",
   });
 
+  const [isShowPassword, setIsShowPassword] = useState(true);
+
+  const queryClient = useQueryClient();
+
+  const {mutate} = useMutation({
+    mutationFn: async ({username, password}) => {
+      try {
+        const response = await fetch("/api/auth/signin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({username, password})
+        });
+
+        const result = await response.json();
+
+          if (result.success) {
+            toast.success(result.message);
+          } else {
+            toast.error(result.message);
+          }
+
+        return result.data;
+      } catch (error) {
+        toast.error(error);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["authUser"]});
+    }
+  });
+
+  const togglePasswordVisibility = () => {
+    setIsShowPassword(!isShowPassword);
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+   mutate(formData);
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const isError = false;
 
   return (
     <div className="max-w-screen-xl mx-auto flex h-screen">
@@ -33,7 +73,7 @@ const SignInPage = () => {
           <XSvg className="w-24 lg:hidden fill-white" />
           <h1 className="text-4xl font-extrabold text-white">{"Let's"} go.</h1>
           <label className="input input-bordered rounded flex items-center gap-2">
-            <MdOutlineMail />
+            <FaRegUser />
             <input
               type="text"
               className="grow"
@@ -47,21 +87,28 @@ const SignInPage = () => {
           <label className="input input-bordered rounded flex items-center gap-2">
             <MdPassword />
             <input
-              type="password"
+              type={isShowPassword ? "password" : "text"}
               className="grow"
               placeholder="Password"
               name="password"
               onChange={handleInputChange}
               value={formData.password}
             />
+
+            <button
+            onClick={togglePasswordVisibility}
+              className="top-2 right-2"
+              type="button"
+            >
+              {!isShowPassword ? <MdOutlineVisibility/> : <MdOutlineVisibilityOff/>}
+            </button>
           </label>
           <button
-            className="btn rounded-full btn-primary text-white"
+            className="btn rounded-full btn-primary text-white text-xl"
             type="submit"
           >
             Login
           </button>
-          {isError && <p className="text-red-500">Something went wrong</p>}
 
           <div className="flex flex-col gap-2 mt-4">
             <p className="text-white text-lg">

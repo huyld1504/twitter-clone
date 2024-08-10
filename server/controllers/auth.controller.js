@@ -7,7 +7,7 @@ export const signup = async (req, res) => {
         const { username, email, fullName, password } = req.body;
 
         if (username.trim() === "" || email.trim() === "" || fullName.trim() === "" || password.trim() === "") {
-            return res.status(400).json({message: "All fields are required"});
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,7 +55,11 @@ export const signup = async (req, res) => {
                     followers: newUser.followers,
                     following: newUser.following,
                     profileImage: newUser.profileImage,
-                    coverImage: newUser.coverImage
+                    coverImage: newUser.coverImage,
+                    likedPosts: newUser.likedPosts,
+                    link: newUser.link,
+                    bio: newUser.bio,
+                    createdAt: newUser.createdAt
                 }
             });
         } else {
@@ -88,12 +92,17 @@ export const signin = async (req, res) => {
             message: "Log in successfully",
             data: {
                 _id: user._id,
+                username: user.username,
                 fullName: user.fullName,
                 email: user.email,
                 followers: user.followers,
                 following: user.following,
                 profileImage: user.profileImage,
-                coverImage: user.coverImage
+                coverImage: user.coverImage,
+                likedPosts: user.likedPosts,
+                link: user.link,
+                bio: user.bio,
+                createdAt: user.createdAt
             }
         });
     } catch (error) {
@@ -105,7 +114,7 @@ export const signin = async (req, res) => {
 export const logout = async (req, res) => {
     try {
         res.cookie("jwt", "", { maxAge: 0 });
-        res.status(200).json({ message: "Logged out successfully" });
+        res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: "Interval Server Error!" });
