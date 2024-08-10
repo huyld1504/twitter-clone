@@ -58,10 +58,12 @@ const Post = ({ post }) => {
             )}
           </div>
           <div className="flex flex-col gap-3 overflow-hidden">
-            <span>{post.text}</span>
+            <span>{post.caption}</span>
             {post.img && (
               <img
-                src={post.img}
+                src={
+                  post.img || "/posts/post1.png"
+                }
                 className="h-80 object-contain rounded-lg border border-gray-700"
                 alt=""
               />

@@ -1,5 +1,5 @@
 import Notification from "../models/notification.model.js";
-import Post from "../models/posts.model.js";
+import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -61,48 +61,33 @@ export const deletePost = async (req, res) => {
 }
 
 export const commentOnPost = async (req, res) => {
-    const result = {
-        success: false,
-        message: "",
-        data: []
-    };
-
     try {
         const { text } = req.body;
         const postId = req.params.id;
         const userId = req.user._id;
 
         if (!text) {
-            result.message = "Caption field is required";
-            return res.status(400).json(result);
+            return res.status(400).json({message: "Text Field is required"});
         }
 
         const post = await Post.findById(postId);
         if (!post) {
-            result.message = "Post not found";
-            return res.status(404).json(result);
+            return res.status(404).json({message: "Post not found"});
         }
 
         const comment = { user: userId, text };
         post.comments.push(comment);
         await post.save();
 
-        result.success = true;
-        result.message = "You commented successfully";
-        result.data = post;
-        res.status(200).json(result);
+        res.status(200).json(post);
     } catch (error) {
         console.log(err);
         result.message = err.message;
-        res.status(500).json(result);
+        res.status(500).json({message: error.message});
     }
 }
 
 export const likeUnlikePost = async (req, res) => {
-    const result = {
-        success: false,
-        message: ""
-    }
 
     try {
         const userId = req.user._id;
@@ -110,8 +95,7 @@ export const likeUnlikePost = async (req, res) => {
 
         const post = await Post.findById(postId);
         if (!post) {
-            result.message = "Post Not Found";
-            return res.status(404).json(result);
+            return res.status(404).json({message: "Post not Found"});
         }
 
         const userLikedPost = post.likes.includes(userId);
@@ -120,16 +104,15 @@ export const likeUnlikePost = async (req, res) => {
             //Unlike post
             await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
             await User.updateOne({ _id: userId }, { $pull: { likedPosts: postId } });
-            result.success = true;
-            result.message = "Unliked post successfully";
-            res.status(200).json(result);
+
+            const updatedLikes = post.likes.filter((id) => id.toString() !== userId.toString());
+
+            res.status(200).json(updatedLikes);
         } else {
             //Like post
             post.likes.push(userId);
             await User.updateOne({ _id: userId }, { $push: { likedPosts: postId } });
             await post.save();
-            result.message = "Liked post successfully";
-            result.success = true;
 
             const notification = new Notification({
                 from: userId,
@@ -138,12 +121,12 @@ export const likeUnlikePost = async (req, res) => {
             });
             await notification.save();
 
-            res.status(200).json(result);
+            res.status(200).json(post.likes);
         }
     } catch (error) {
         console.log(err);
         result.message = err.message;
-        res.status(500).json(result);
+        res.status(500).json({message: error.message});
     }
 }
 
@@ -158,7 +141,7 @@ export const getAllPosts = async (req, res) => {
         });
 
         if (posts.length === 0) {
-            return res.status(200).json({ message: "No Posts", data: [] });
+            return res.status(200).json([]);
         }
 
         res.status(200).json(posts)
@@ -172,7 +155,7 @@ export const getLikedPost = async (req, res) => {
     const userId = req.params.id;
     try {
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: "User Not Found" });
+        if (!user) return res.status(404).json({ message: "User Not Found" });
 
         const likedPosts = await Post.find({ _id: { $in: user.likedPosts } }).populate({
             path: "user",
@@ -182,7 +165,7 @@ export const getLikedPost = async (req, res) => {
             select: "-password"
         });
 
-        res.status(200).json({success: true, data: likedPosts});
+        res.status(200).json({likedPosts});
     } catch (error) {
         console.log(err);
         res.status(500).json({message: error.message});
@@ -205,7 +188,7 @@ export const getFollowingPosts = async (req, res) => {
             select: "-password"
         });
 
-        res.status(200).json({success: true, data: feedPosts})
+        res.status(200).json(feedPosts)
 
     } catch (error) {
         console.log(error),
@@ -227,7 +210,7 @@ export const getUserPosts = async (req, res) => {
             select: "-password"
         })
 
-        res.status(200).json({success: true, data: posts});
+        res.status(200).json(posts);
     } catch (error) {
         console.log(error);
         res.status(500).json({success: false, message: error.message});
