@@ -27,7 +27,6 @@ const Posts = ({ feedType }) => {
 
         if (!res.ok)
           throw new Error(result.message || "Opps Something Went Wrong");
-
         return result;
       } catch (error) {
         throw new Error(error);
