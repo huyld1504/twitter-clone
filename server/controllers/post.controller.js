@@ -25,7 +25,7 @@ export const createPost = async (req, res) => {
         const newPost = new Post({
             user: userId,
             caption,
-            img
+            img: img || null
         });
 
         await newPost.save();
