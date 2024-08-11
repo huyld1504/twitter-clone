@@ -3,7 +3,7 @@ import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {toast} from "react-hot-toast";
@@ -13,6 +13,8 @@ import { formatPostDate } from "../../utils/db/date/index.js";
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
 
+  const {data: authUser} = useQuery({queryKey: ["authUser"]});
+
   const postOwner = post.user ? post.user : null;
   const isLiked = post.likes.includes(authUser._id);
 
@@ -21,7 +23,6 @@ const Post = ({ post }) => {
   const formattedDate = formatPostDate(post.createdAt);
 
   const queryClient = useQueryClient();
-  const {data: authUser} = useQuery({queryKey: ["authUser"]});
 
   // delete post
   const {mutate: deletePost, isPending: isDeleting} = useMutation({
