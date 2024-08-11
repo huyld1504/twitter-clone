@@ -166,9 +166,9 @@ export const getLikedPost = async (req, res) => {
             select: "-password"
         });
 
-        res.status(200).json({likedPosts});
+        res.status(200).json(likedPosts);
     } catch (error) {
-        console.log(err);
+        console.log(error);
         res.status(500).json({message: error.message});
     }
 }
