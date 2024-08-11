@@ -30,7 +30,6 @@ function App() {
           throw new Error(result.message || "Opps! Something went wrong");
         }
 
-        console.log("auth user", result);
         return result;
       } catch (error) {
         throw new Error(error);
