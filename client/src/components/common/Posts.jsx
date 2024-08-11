@@ -1,4 +1,4 @@
-import Post from "./Post";
+import Post from "./Post.jsx"
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -32,7 +32,6 @@ const Posts = ({ feedType, username, userId }) => {
       try {
         const res = await fetch(POST_ENDPOINT);
         const result = await res.json();
-        console.log(result);
 
         if (!res.ok)
           throw new Error(result.message || "Opps Something Went Wrong");

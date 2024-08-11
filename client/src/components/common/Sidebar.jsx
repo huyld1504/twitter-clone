@@ -93,7 +93,7 @@ const Sidebar = () => {
             >
               <div className="avatar hidden md:inline-flex">
                 <div className="w-10 rounded-full">
-                  <img src={authUser?.profileImg || "/avatar-placeholder.png"} />
+                  <img src={authUser?.profileImage || "/avatar-placeholder.png"} />
                 </div>
               </div>
               <div className="flex justify-start flex-1">

@@ -6,14 +6,14 @@ import { FaTrash } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {toast} from "react-hot-toast";
-import LoadingSpinner from "../common/LoadingSpinner.jsx"
-import { formatPostDate } from "../../utils/db/date/index.js";
+import { toast } from "react-hot-toast";
+import LoadingSpinner from "../common/LoadingSpinner.jsx";
+import { formatPostDate } from "../../utils/date/index.js";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
 
-  const {data: authUser} = useQuery({queryKey: ["authUser"]});
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
   const postOwner = post.user ? post.user : null;
   const isLiked = post.likes.includes(authUser._id);
@@ -25,73 +25,77 @@ const Post = ({ post }) => {
   const queryClient = useQueryClient();
 
   // delete post
-  const {mutate: deletePost, isPending: isDeleting} = useMutation({
+  const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       try {
         const res = await fetch(`/api/posts/delete/${post._id}`, {
-          method: "DELETE"
+          method: "DELETE",
         });
 
         const result = await res.json();
 
-        if (!res.ok) throw new Error(result.message || "Opps! Something went wrong!");
+        if (!res.ok)
+          throw new Error(result.message || "Opps! Something went wrong!");
 
         return result;
       } catch (error) {
         throw new Error(error);
       }
-    }, onSuccess: () => {
+    },
+    onSuccess: () => {
       toast.success("Delete post successfully!");
-      queryClient.invalidateQueries({queryKey: ["posts"]});
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
     onError: () => {
       toast.error("Opps! Something went wrong!");
-    }
+    },
   });
 
   // like/unlike post
-  const {mutate: likePost, isPending: isLiking} = useMutation({
-      mutationFn: async () => {
-        try {
-          const res = await fetch(`/api/posts/like/${post._id}`, {
-            method: "POST"
-          });
-          const result = await res.json();
-
-          if (!res.ok) throw new Error(result.message || "Opps! Something went wrong");
-          return result;
-        } catch (error) {
-          throw new Error(error.message);
-        }
-      },
-      onSuccess: (updatedLikes) => {
-        queryClient.setQueryData(["posts"], (oldData) => {
-          return oldData.map((p) =>{
-            if (p._id === post._id) {
-              return {...p, likes: updatedLikes};
-            }
-            return p;
-          });
+  const { mutate: likePost, isPending: isLiking } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/like/${post._id}`, {
+          method: "POST",
         });
-      },
-      onError: (error) => {
-        toast.error(error.message);
+        const result = await res.json();
+
+        if (!res.ok)
+          throw new Error(result.message || "Opps! Something went wrong");
+        return result;
+      } catch (error) {
+        throw new Error(error.message);
       }
+    },
+    onSuccess: (updatedLikes) => {
+      queryClient.setQueryData(["posts"], (oldData) => {
+        return oldData.map((p) => {
+          if (p._id === post._id) {
+            return { ...p, likes: updatedLikes };
+          }
+          return p;
+        });
+      });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  // comment post 
-  const {mutate: commentPost, isPending: isCommenting} = useMutation({
+  // comment post
+  const { mutate: commentPost, isPending: isCommenting } = useMutation({
     mutationFn: async () => {
       try {
         const res = await fetch(`/api/posts/comment/${post._id}`, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
-          }, 
-          body: JSON.stringify({text: comment})
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: comment }),
         });
         const result = await res.json();
-        if (!res.ok) throw new Error(result.message || "Opps! Something went wrong!");
+        if (!res.ok)
+          throw new Error(result.message || "Opps! Something went wrong!");
 
         return result;
       } catch (error) {
@@ -103,8 +107,8 @@ const Post = ({ post }) => {
     },
     onError: (error) => {
       toast.error(error.message);
-      queryClient.invalidateQueries({queryKey: ["posts"]});
-    }
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
   });
 
   const handleDeletePost = () => {
@@ -130,7 +134,13 @@ const Post = ({ post }) => {
             to={`/profile/${postOwner?.username}`}
             className="w-8 rounded-full overflow-hidden"
           >
-            <img src={postOwner?.profileImg || "/avatar-placeholder.png"} />
+            <div className="avatar">
+              <div className="w-8 rounded-full">
+                <img
+                  src={postOwner?.profileImage || "/avatar-placeholder.png"}
+                />
+              </div>
+            </div>
           </Link>
         </div>
         <div className="flex flex-col flex-1">
@@ -147,12 +157,14 @@ const Post = ({ post }) => {
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
-                {!isDeleting && <FaTrash
-                  className="cursor-pointer hover:text-red-500"
-                  onClick={handleDeletePost}
-                />}
+                {!isDeleting && (
+                  <FaTrash
+                    className="cursor-pointer hover:text-red-500"
+                    onClick={handleDeletePost}
+                  />
+                )}
 
-                {isDeleting && <LoadingSpinner size="sm"/>}
+                {isDeleting && <LoadingSpinner size="sm" />}
               </span>
             )}
           </div>
@@ -160,9 +172,7 @@ const Post = ({ post }) => {
             <span>{post.caption}</span>
             {post.img && (
               <img
-                src={
-                  post.img || "/posts/post1.png"
-                }
+                src={post.img || "/posts/post1.png"}
                 className="h-80 object-contain rounded-lg border border-gray-700"
                 alt=""
               />
@@ -198,11 +208,11 @@ const Post = ({ post }) => {
                     )}
                     {post.comments.map((comment) => (
                       <div key={comment._id} className="flex gap-2 items-start">
-                        <div className="avatar">
+                        <div className="avatar hidden md:inline-flex">
                           <div className="w-8 rounded-full">
                             <img
                               src={
-                                comment.user.profileImg ||
+                                authUser?.profileImage ||
                                 "/avatar-placeholder.png"
                               }
                             />
@@ -233,11 +243,7 @@ const Post = ({ post }) => {
                       onChange={(e) => setComment(e.target.value)}
                     />
                     <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-                      {isCommenting ? (
-                        <LoadingSpinner size="sm"/>
-                      ) : (
-                        "Post"
-                      )}
+                      {isCommenting ? <LoadingSpinner size="sm" /> : "Post"}
                     </button>
                   </form>
                 </div>
@@ -255,7 +261,7 @@ const Post = ({ post }) => {
                 className="flex gap-1 items-center group cursor-pointer"
                 onClick={handleLikePost}
               >
-                {isLiking && <LoadingSpinner size="sm"/>}
+                {isLiking && <LoadingSpinner size="sm" />}
                 {!isLiked && !isLiking && (
                   <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
                 )}
@@ -263,7 +269,11 @@ const Post = ({ post }) => {
                   <FaRegHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
                 )}
 
-                <span className={`text-sm group-hover:text-pink-500 ${ isLiked ? "text-pink-500" : "text-slate-500"}`}>
+                <span
+                  className={`text-sm group-hover:text-pink-500 ${
+                    isLiked ? "text-pink-500" : "text-slate-500"
+                  }`}
+                >
                   {post.likes.length}
                 </span>
               </div>

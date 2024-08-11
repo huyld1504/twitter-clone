@@ -91,62 +91,63 @@ export const getSuggestedUser = async (req, res) => {
 
 export const updateProfileUser = async (req, res) => {
     const { fullName, email, username, currentPassword, newPassword, bio, link } = req.body;
+	let { profileImage, coverImage } = req.body;
 
-    let { profileImage, coverImage } = req.body;
+	const userId = req.user._id;
 
-    const userId = req.user._id;
-    const values = { username, email, fullName, password: "" , bio, link, profileImage, coverImage };
+	try {
+		let user = await User.findById(userId);
+		if (!user) return res.status(404).json({ message: "User not found" });
 
-    try {
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+		if ((!newPassword && currentPassword) || (!currentPassword && newPassword)) {
+			return res.status(400).json({ error: "Please provide both current password and new password" });
+		}
 
-        if ((!newPassword && currentPassword) || (!currentPassword && newPassword)) {
-            return res.status(400).json({ success: false, message: "Please provide both current password and new password" });
-        }
+		if (currentPassword && newPassword) {
+			const isMatch = await bcrypt.compare(currentPassword, user.password);
+			if (!isMatch) return res.status(400).json({ error: "Current password is incorrect" });
+			if (newPassword.length < 6) {
+				return res.status(400).json({ error: "Password must be at least 6 characters long" });
+			}
 
-        if (currentPassword && newPassword) {
-            const isMatchPassword = await bcrypt.compare(currentPassword, user.password);
-            if (!isMatchPassword) {
-                return res.status(400).json({ success: false, message: "Current password is incorrect" });
-            }
-            if (newPassword.length < 6) {
-                return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
-            }
-            if (newPassword === currentPassword) {
-                return res.status(400).json({ success: false, message: "You can not use your current password to set your new password" });
-            }
+			const salt = await bcrypt.genSalt(10);
+			user.password = await bcrypt.hash(newPassword, salt);
+		}
 
-            const salt = await bcrypt.genSalt(10);
-            const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-            values.password = hashedNewPassword;
-        } else {
-            values.password = user.password;
-        }
+		if (profileImage) {
+			if (user.profileImage) {
+				await cloudinary.uploader.destroy(user.profileImage.split("/").pop().split(".")[0]);
+			}
 
-        if (profileImage) {
-            if (user.profileImage) {
-                await cloudinary.uploader.destroy(user.profileImage.split("/").pop().split(".")[0]);
-            }
+			const uploadedResponse = await cloudinary.uploader.upload(profileImage);
+			profileImage = uploadedResponse.secure_url;
+		}
 
-            const uploadedResponse = await cloudinary.uploader.upload(profileImage);
-            profileImage = uploadedResponse.secure_url;
-        }
+		if (coverImage) {
+			if (user.coverImage) {
+				await cloudinary.uploader.destroy(user.coverImage.split("/").pop().split(".")[0]);
+			}
 
-        if (coverImage) {
-            if (user.coverImage) {
-                await cloudinary.uploader.destroy(user.coverImage.split("/").pop().split(".")[0]);
-            }
+			const uploadedResponse = await cloudinary.uploader.upload(coverImage);
+			coverImage = uploadedResponse.secure_url;
+		}
 
-            const uploadedResponse = await cloudinary.uploader.upload(coverImage);
-            coverImage = uploadedResponse.secure_url;
-        }
+		user.fullName = fullName || user.fullName;
+		user.email = email || user.email;
+		user.username = username || user.username;
+		user.bio = bio || user.bio;
+		user.link = link || user.link;
+		user.profileImage = profileImage || user.profileImage;
+		user.coverImage = coverImage || user.coverImage;
 
-        await User.findByIdAndUpdate(req.user._id, values);
-        return res.status(200).json({ message: "Updated successfully", success: true });
+		user = await user.save();
 
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ message: error.message, success: false });
-    }
-}
+		// password should be null in response
+		user.password = null;
+
+		return res.status(200).json(user);
+	} catch (error) {
+		console.log("Error in updateUser: ", error.message);
+		res.status(500).json({ error: error.message });
+	}
+};
