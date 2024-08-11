@@ -83,6 +83,8 @@ const ProfilePage = () => {
     },
     onSuccess: () => {
       toast.success("Updated profile successfully!");
+      setCoverImage(null);
+      setProfileImage(null);
       Promise.all([
         queryClient.invalidateQueries({queryKey: ["authUser"]}),
         queryClient.invalidateQueries({queryKey: ["userProfile"]})
