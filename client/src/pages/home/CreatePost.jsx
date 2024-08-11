@@ -24,13 +24,11 @@ const CreatePost = () => {
           body: JSON.stringify({caption, img})
         })
         const result = await res.json();
-        console.log(result);
 
         if (!res.ok) throw new Error(result.message || "Opps! Something went wrong!");
         
         return result.data;
       } catch (error) {
-        console.log(error);
         throw new Error(error);
       }
     },

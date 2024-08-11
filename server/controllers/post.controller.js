@@ -31,7 +31,6 @@ export const createPost = async (req, res) => {
         await newPost.save();
         res.status(201).json({ success: true, message: "Created post successfully", data: newPost });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ success: false, message: error });
     }
 }
@@ -55,7 +54,6 @@ export const deletePost = async (req, res) => {
         await Post.findByIdAndDelete(req.params.id);
         res.status(201).json({ success: true, message: "Post deleted successfully" });
     } catch (error) {
-        console.log(err.message)
         res.status(500).json({ success: false, message: error.message });
     }
 }
@@ -81,7 +79,6 @@ export const commentOnPost = async (req, res) => {
 
         res.status(200).json(post);
     } catch (error) {
-        console.log(err);
         result.message = err.message;
         res.status(500).json({message: error.message});
     }
@@ -125,7 +122,6 @@ export const likeUnlikePost = async (req, res) => {
             res.status(200).json(updatedLikes);
         }
     } catch (error) {
-        console.log(err);
         result.message = err.message;
         res.status(500).json({message: error.message});
     }
@@ -147,7 +143,6 @@ export const getAllPosts = async (req, res) => {
 
         res.status(200).json(posts)
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: error.message });
     }
 }
@@ -168,7 +163,6 @@ export const getLikedPost = async (req, res) => {
 
         res.status(200).json(likedPosts);
     } catch (error) {
-        console.log(error);
         res.status(500).json({message: error.message});
     }
 }
@@ -192,7 +186,6 @@ export const getFollowingPosts = async (req, res) => {
         res.status(200).json(feedPosts)
 
     } catch (error) {
-        console.log(error),
         res.status(500).json({success: false, message: error.message});
     }
 }
@@ -213,7 +206,6 @@ export const getUserPosts = async (req, res) => {
 
         res.status(200).json(posts);
     } catch (error) {
-        console.log(error);
         res.status(500).json({success: false, message: error.message});
     }
 }

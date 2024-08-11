@@ -67,7 +67,6 @@ export const signup = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: "Interval Server Error!" });
-        console.log(error);
     }
 }
 
@@ -107,7 +106,6 @@ export const signin = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: "Interval Server Error!" });
-        console.log(error.message);
     }
 }
 
@@ -116,7 +114,6 @@ export const logout = async (req, res) => {
         res.cookie("jwt", "", { maxAge: 0 });
         res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
-        console.log(error.message);
         res.status(500).json({ message: "Interval Server Error!" });
     }
 }
@@ -127,7 +124,6 @@ export const getCookieUser = async (req, res) => {
 
         return res.status(200).json(cookieUser);
     } catch (error) {
-        console.log(error.message);
         res.status(500).json({ message: "Interval Server Error!" });
     }
 };

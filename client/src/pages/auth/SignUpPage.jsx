@@ -46,7 +46,6 @@ const SignUpPage = () => {
           }
         return result.data;
       } catch (error) {
-        console.log(error);
         toast.error(error);
       }
     },

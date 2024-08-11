@@ -14,7 +14,6 @@ export const getProfileUser = async (req, res) => {
 
         return res.status(200).json({success: true, data: user});
     } catch (error) {
-        console.log(error.message);
         res.status(500).json({ message: error.message });
     }
 }
@@ -54,7 +53,6 @@ export const followUnfollowUser = async (req, res) => {
             res.status(200).json({ message: "Followed successfully" });
         }
     } catch (error) {
-        console.log(error.message);
         res.status(500).json({ message: error.message });
     }
 }
@@ -84,7 +82,6 @@ export const getSuggestedUser = async (req, res) => {
 
         res.status(200).json(suggestedUser);
     } catch (error) {
-        console.log(error.message);
         res.status(500).json({ message: error.message });
     }
 }
@@ -147,7 +144,6 @@ export const updateProfileUser = async (req, res) => {
 
 		return res.status(200).json(user);
 	} catch (error) {
-		console.log("Error in updateUser: ", error.message);
 		res.status(500).json({ error: error.message });
 	}
 };
