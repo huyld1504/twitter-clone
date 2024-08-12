@@ -24,7 +24,7 @@ app.use(express.json({limit: "5mb"})); //to parse req.body DoS attack
 app.use(express.urlencoded({extended: true})); // to parse form data
 
 app.use(cookieParser());
-// app.use(cors());
+app.use(cors());
 
 
 app.use("/api/auth", authRoutes);
